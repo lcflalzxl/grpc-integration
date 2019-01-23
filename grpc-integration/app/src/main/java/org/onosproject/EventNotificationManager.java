@@ -19,7 +19,11 @@ package org.onosproject.grpcintegration.app;
 
 import io.grpc.stub.StreamObserver;
 import org.onosproject.grpc.net.link.models.LinkEventProto;
-import org.onosproject.grpc.net.models.ServicesProto;
+import org.onosproject.grpc.net.models.ServicesProto.Notification;
+import org.onosproject.grpc.net.models.ServicesProto.RegistrationRequest;
+import org.onosproject.grpc.net.models.ServicesProto.RegistrationResponse;
+import org.onosproject.grpc.net.models.ServicesProto.Topic;
+import org.onosproject.grpc.net.models.ServicesProto.topicType;
 import org.onosproject.grpc.net.packet.models.PacketContextProtoOuterClass;
 import org.onosproject.incubator.protobuf.models.net.link.LinkNotificationProtoTranslator;
 import org.onosproject.incubator.protobuf.models.net.packet.PacketContextProtoTranslator;
@@ -38,25 +42,32 @@ import org.onosproject.grpc.net.models.EventNotificationGrpc.EventNotificationIm
 import org.onosproject.grpcintegration.api.EventNotficationService;
 import org.slf4j.Logger;
 
-import java.util.HashMap;
+
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * Implements EventNotificiation gRPC service.
+ */
 @Component(immediate = true, service = EventNotficationService.class)
 public class EventNotificationManager
         extends EventNotificationImplBase
-        implements EventNotficationService{
+        implements EventNotficationService {
 
 
     private final Logger log = getLogger(getClass());
 
-    protected static Map<String, StreamObserver<ServicesProto.Notification>> observerMap = new HashMap<>();
+    protected static Map<String, StreamObserver<Notification>>
+            observerMap = new HashMap<>();
     protected static Set<String> clientList = new HashSet<>();
+    protected static Map<String, List<String>> clientKeyMap = new HashMap<>();
     ExecutorService executorService = Executors.newFixedThreadPool(1);
 
 
@@ -84,12 +95,12 @@ public class EventNotificationManager
 
     @Override
     public void register(
-            ServicesProto.RegistrationRequest registrationRequest,
-            StreamObserver<ServicesProto.RegistrationResponse> observer) {
+            RegistrationRequest registrationRequest,
+            StreamObserver<RegistrationResponse> observer) {
 
-        log.info("registration request has been recevied");
-        ServicesProto.RegistrationResponse registrationResponse =
-                ServicesProto.RegistrationResponse.newBuilder()
+        log.info("Registration request has been recevied");
+        RegistrationResponse registrationResponse =
+                RegistrationResponse.newBuilder()
                         .setClientId(registrationRequest.getClientId())
                         .setServerId("grpc-integration")
                         .build();
@@ -102,7 +113,8 @@ public class EventNotificationManager
 
 
     @Override
-    public void onEvent(ServicesProto.Topic topic, StreamObserver<ServicesProto.Notification> observer) {
+    public void onEvent(Topic topic,
+                        StreamObserver<Notification> observer) {
 
         observerMap.put(topic.getClientId() + topic.getType(), observer);
         log.info("The client " + topic.getClientId()
@@ -124,9 +136,9 @@ public class EventNotificationManager
                     PacketContextProtoTranslator.translate(context);
 
             for (String clientId : clientList) {
-                String key = clientId + ServicesProto.topicType.PACKET_EVENT.toString();
-                ServicesProto.Notification notification =
-                        ServicesProto.Notification.newBuilder()
+                String key = clientId + topicType.PACKET_EVENT.toString();
+                Notification notification =
+                        Notification.newBuilder()
                                 .setClientId(clientId)
                                 .setPacketContext(packetContextProto)
                                 .build();
@@ -150,9 +162,9 @@ public class EventNotificationManager
                     LinkNotificationProtoTranslator.translate(event);
 
             for (String clientId : clientList) {
-                String key = clientId + ServicesProto.topicType.LINK_EVENT.toString();
-                ServicesProto.Notification notification =
-                        ServicesProto.Notification.newBuilder()
+                String key = clientId + topicType.LINK_EVENT.toString();
+                Notification notification =
+                        Notification.newBuilder()
                                 .setClientId(clientId)
                                 .setLinkEvent(linkNotificationProto)
                                 .build();
@@ -167,7 +179,4 @@ public class EventNotificationManager
 
         }
     }
-
-
-
 }
