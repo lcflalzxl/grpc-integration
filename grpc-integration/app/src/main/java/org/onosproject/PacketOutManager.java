@@ -18,7 +18,7 @@ package org.onosproject.grpcintegration.app;
 
 import io.grpc.stub.StreamObserver;
 import org.onlab.osgi.DefaultServiceDirectory;
-import org.onosproject.grpc.net.models.ServicesProto;
+import org.onosproject.grpc.net.models.ServicesProto.PacketOutStatus;
 import org.onosproject.grpc.net.packet.models.OutboundPacketProtoOuterClass;
 import org.onosproject.incubator.protobuf.models.net.packet.OutboundPacketProtoTranslator;
 import org.onosproject.net.packet.OutboundPacket;
@@ -61,14 +61,14 @@ public class PacketOutManager
 
     @Override
     public void emit(OutboundPacketProtoOuterClass.OutboundPacketProto request,
-                     StreamObserver<ServicesProto.PacketOutStatus> responseObserver) {
+                     StreamObserver<PacketOutStatus> responseObserver) {
 
         OutboundPacket outboundPacket = OutboundPacketProtoTranslator.translate(request);
 
         packetService = DefaultServiceDirectory.getService(PacketService.class);
         packetService.emit(outboundPacket);
 
-        ServicesProto.PacketOutStatus reply = ServicesProto.PacketOutStatus
+        PacketOutStatus reply = PacketOutStatus
                 .newBuilder()
                 .setStat(true).build();
         responseObserver.onNext(reply);
