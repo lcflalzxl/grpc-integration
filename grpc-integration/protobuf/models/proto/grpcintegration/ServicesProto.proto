@@ -13,6 +13,7 @@ import "apps/grpc-integration/protobuf/models/proto/net/PathProto.proto";
 import "apps/grpc-integration/protobuf/models/proto/net/DeviceProto.proto";
 import "apps/grpc-integration/protobuf/models/proto/grpcintegration/EventNotificationProto.proto";
 import "apps/grpc-integration/protobuf/models/proto/grpcintegration/StatusProto.proto";
+import "apps/grpc-integration/protobuf/models/proto/net/HostProto.proto";
 
 
 // Corresponds to PacketOut service
@@ -31,6 +32,11 @@ service TopoService {
     rpc getGraph (Empty) returns (net.topology.TopologyGraphProto);
     rpc currentTopology (Empty) returns (net.topology.TopologyProto);
     rpc getPaths (getPathRequest) returns (Paths);
+    rpc getHosts (Empty) returns (Hosts);
+}
+
+message Hosts {
+    repeated net.HostProto host = 1;
 }
 
 // Corresponds to EventNotification service

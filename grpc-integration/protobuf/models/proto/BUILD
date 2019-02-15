@@ -114,6 +114,7 @@ proto_library(
         ":TopologyCluster_proto",
         ":TopologyGraph_proto",
         ":Topology_proto",
+        ":Host_proto"
     ],
 )
 
