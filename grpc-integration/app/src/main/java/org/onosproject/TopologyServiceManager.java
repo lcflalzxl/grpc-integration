@@ -18,10 +18,10 @@ package org.onosproject.grpcintegration.app;
 
 import io.grpc.stub.StreamObserver;
 import org.onlab.osgi.DefaultServiceDirectory;
-import org.onosproject.grpc.grpcintegration.models.ServicesProto.Hosts;
-import org.onosproject.grpc.grpcintegration.models.ServicesProto.Empty;
-import org.onosproject.grpc.grpcintegration.models.ServicesProto.Paths;
-import org.onosproject.grpc.grpcintegration.models.ServicesProto.getPathRequest;
+import org.onosproject.grpc.grpcintegration.models.ControlMessagesProto.Hosts;
+import org.onosproject.grpc.grpcintegration.models.ControlMessagesProto.Empty;
+import org.onosproject.grpc.grpcintegration.models.ControlMessagesProto.Paths;
+import org.onosproject.grpc.grpcintegration.models.ControlMessagesProto.getPathRequest;
 import org.onosproject.grpc.grpcintegration.models.TopoServiceGrpc.TopoServiceImplBase;
 import org.onosproject.grpc.net.models.HostProtoOuterClass.HostProto;
 import org.onosproject.grpc.net.topology.models.TopologyGraphProtoOuterClass.TopologyGraphProto;
