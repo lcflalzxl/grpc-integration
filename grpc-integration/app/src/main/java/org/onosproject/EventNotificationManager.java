@@ -24,6 +24,7 @@ import org.onosproject.grpc.grpcintegration.models.EventNotificationProto.Regist
 import org.onosproject.grpc.grpcintegration.models.EventNotificationProto.RegistrationResponse;
 import org.onosproject.grpc.grpcintegration.models.EventNotificationProto.Topic;
 import org.onosproject.grpc.grpcintegration.models.EventNotificationProto.topicType;
+import org.onosproject.grpc.net.device.models.DeviceEventProto;
 import org.onosproject.grpc.net.link.models.LinkEventProto.LinkNotificationProto;
 import org.onosproject.grpc.net.packet.models.PacketContextProtoOuterClass.PacketContextProto;
 import org.onosproject.grpcintegration.api.EventNotificationService;

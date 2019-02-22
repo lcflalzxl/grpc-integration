@@ -104,6 +104,7 @@ public class GrpcServerManager implements GrpcServer {
                             .addService(new FlowServiceManager())
                             .addService(new TopologyServiceManager())
                             .addService(new HostServiceManager())
+                            .addService(new DeviceServiceManager())
                             .build()
                             .start();
         }
