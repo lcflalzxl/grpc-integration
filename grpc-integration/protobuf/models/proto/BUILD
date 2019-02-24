@@ -90,6 +90,7 @@ proto_library(
     deps = [
         ":ClusterId_proto",
         ":Device_proto",
+        ":FlowRule_proto",
         ":Host_proto",
         ":Path_proto",
         ":Port_proto",
@@ -289,6 +290,7 @@ proto_library(
     proto_source_root = PROTO_SOURCE_ROOT,
     visibility = ["//visibility:public"],
     deps = [
+        ":ApplicationId_proto",
         ":FlowRuleEnums_proto",
         ":TrafficTreatment_proto",
         ":TraficSelector_proto",

@@ -20,6 +20,9 @@ import io.grpc.stub.StreamObserver;
 import org.onlab.osgi.DefaultServiceDirectory;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.CoreService;
+import org.onosproject.grpc.grpcintegration.models.ControlMessagesProto.FlowRuleCount;
+import org.onosproject.grpc.grpcintegration.models.ControlMessagesProto.Empty;
+import org.onosproject.grpc.grpcintegration.models.ControlMessagesProto.FlowRules;
 import org.onosproject.grpc.grpcintegration.models.FlowServiceGrpc.FlowServiceImplBase;
 import org.onosproject.grpc.grpcintegration.models.StatusProto.FlowServiceStatus;
 import org.onosproject.grpc.net.flow.models.FlowRuleProto;
@@ -33,6 +36,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
+
+import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -65,55 +70,97 @@ public class FlowServiceManager
     log.info("Flow Service has been deactivated");
   }
 
+  /**
+     * Service for injecting flow rules into the environment.
+     * @param flowRules {@link FlowRules}
+     * @param observer {@link FlowServiceStatus}
+     */
   @Override
-  public void addFlow(FlowRuleProto flowRuleRequest,
-                      StreamObserver<FlowServiceStatus> responseObserver) {
-
-    flowRuleService = DefaultServiceDirectory.getService(FlowRuleService.class);
-    coreService = DefaultServiceDirectory.getService(CoreService.class);
-    FlowRule flowRule = null;
-
-    if (flowRuleRequest.getAppName() != null) {
-      ApplicationId applicationId = coreService.registerApplication(flowRuleRequest.getAppName());
-      flowRule = FlowRuleProtoTranslator.translate(applicationId,flowRuleRequest);
-    }
-
-    if(flowRule == null) {
-        log.error("Format of flow rule is not correct");
-        return;
-    }
-
-    flowRuleService.applyFlowRules(flowRule);
-
-    FlowServiceStatus flowServiceStatus = FlowServiceStatus
-            .newBuilder().setStat(true).build();
-    responseObserver.onNext(flowServiceStatus);
-    responseObserver.onCompleted();
-  }
-
-  @Override
-  public void removeFlow(FlowRuleProto flowRuleRequest,
-                         StreamObserver<FlowServiceStatus> responseObserver)  {
+  public void applyFlowRules (FlowRules flowRules,
+                              StreamObserver<FlowServiceStatus> observer)  {
+      List<FlowRuleProto> flowRuleProtoList = flowRules.getFlowruleList();
       flowRuleService = DefaultServiceDirectory.getService(FlowRuleService.class);
-
+      coreService = DefaultServiceDirectory.getService(CoreService.class);
       FlowRule flowRule = null;
 
-      if (flowRuleRequest.getAppName() != null) {
-          ApplicationId applicationId = coreService
-                  .registerApplication(flowRuleRequest.getAppName());
-          flowRule = FlowRuleProtoTranslator.translate(applicationId,flowRuleRequest);
+      for(FlowRuleProto flowRuleProto: flowRuleProtoList) {
+          if (flowRuleProto.getAppName() != null) {
+              ApplicationId applicationId = coreService
+                      .registerApplication(flowRuleProto.getAppName());
+              flowRule = FlowRuleProtoTranslator.translate(applicationId,flowRuleProto);
+          }
+
+          if(flowRule == null) {
+              log.error("Format of flow rule is not correct");
+              return;
+          }
+
+          flowRuleService.applyFlowRules(flowRule);
+
       }
 
-      if(flowRule == null) {
-        log.error("Format of flow rule is not correct");
-        return;
-      }
-
-      flowRuleService.removeFlowRules(flowRule);
       FlowServiceStatus flowServiceStatus = FlowServiceStatus
               .newBuilder().setStat(true).build();
-      responseObserver.onNext(flowServiceStatus);
-      responseObserver.onCompleted();
+      observer.onNext(flowServiceStatus);
+      observer.onCompleted();
+  }
+
+    /**
+     * Removes the specified flow rules from their respoective objectives.
+     * If the device is not presently connected to the controller, these flow rules
+     * will be removed once the device reconnects.
+     * @param flowRules {@link FlowRules}
+     * @param observer {@link FlowServiceStatus}
+     */
+  @Override
+  public void removeFlowRules (FlowRules flowRules, StreamObserver<FlowServiceStatus> observer) {
+      List<FlowRuleProto> flowRuleProtoList = flowRules.getFlowruleList();
+      flowRuleService = DefaultServiceDirectory.getService(FlowRuleService.class);
+      coreService = DefaultServiceDirectory.getService(CoreService.class);
+      FlowRule flowRule = null;
+
+
+      for(FlowRuleProto flowRuleProto: flowRuleProtoList) {
+          if (flowRuleProto.getAppName() != null) {
+              ApplicationId applicationId = coreService.getAppId(flowRuleProto.getAppName());
+              flowRule = FlowRuleProtoTranslator.translate(applicationId,flowRuleProto);
+          }
+
+          if(flowRule == null) {
+              log.error("Format of flow rule is not correct");
+              return;
+          }
+
+          flowRuleService.removeFlowRules(flowRule);
+
+      }
+
+      FlowServiceStatus flowServiceStatus = FlowServiceStatus
+              .newBuilder().setStat(true).build();
+      observer.onNext(flowServiceStatus);
+      observer.onCompleted();
+
+  }
+
+    /**
+     * Returns the number of flow rules in the system.
+     * @param empty {@link Empty}
+     * @param observer {@link FlowRuleCount}
+     */
+  @Override
+  public void getFlowRuleCount (Empty empty,
+                                StreamObserver<FlowRuleCount> observer) {
+
+      flowRuleService = DefaultServiceDirectory.getService(FlowRuleService.class);
+      int count = flowRuleService.getFlowRuleCount();
+
+      FlowRuleCount flowRuleCount = FlowRuleCount
+              .newBuilder()
+              .setCount(count)
+              .build();
+
+      observer.onNext(flowRuleCount);
+      observer.onCompleted();
 
   }
 }

@@ -10,6 +10,7 @@ import "apps/grpc-integration/protobuf/models/proto/net/topology/ClusterIdProto.
 import "apps/grpc-integration/protobuf/models/proto/net/topology/TopologyClusterProto.proto";
 import "apps/grpc-integration/protobuf/models/proto/net/topology/TopologyProto.proto";
 import "apps/grpc-integration/protobuf/models/proto/net/PortProto.proto";
+import "apps/grpc-integration/protobuf/models/proto/net/flow/FlowRuleProto.proto";
 
 message Empty {
 
@@ -56,4 +57,20 @@ message Devices {
 
 message Ports {
     repeated net.PortProto port = 1;
+}
+
+
+// Related to FlowService
+message FlowRules {
+    repeated net.flow.FlowRuleProto flowrule = 1;
+}
+
+message FlowRuleCount {
+    int32 count = 1;
+}
+
+
+// Related to CoreService
+message AppName {
+    string appname = 1;
 }
